@@ -49,9 +49,17 @@ Set-Location $ProjectDir
 cmake --preset $Preset "-DCMAKE_PREFIX_PATH=$SdkDir"
 if ($LASTEXITCODE -ne 0) { throw "CMake configure failed ($LASTEXITCODE)" }
 
-if ($Codegen) {
+# generated/rexglue.cmake only adds the recompiled sources and the DLL target when codegen output
+# exists at configure time. On a fresh checkout, generate first and configure again; otherwise the
+# exe links without the game code (undefined PPCImageConfig).
+$needsCodegen = -not (Test-Path 'generated\default\sources.cmake') -or
+                -not (Test-Path 'generated\crash_dll\sources.cmake')
+if ($Codegen -or $needsCodegen) {
+    Write-Host 'Generating recompiled code from the game executables (about a minute)...'
     & "$SdkDir\bin\rexglue.exe" codegen burnoutcrash_manifest.toml --ignore-stamp
     if ($LASTEXITCODE -ne 0) { throw "codegen failed ($LASTEXITCODE)" }
+    cmake --preset $Preset "-DCMAKE_PREFIX_PATH=$SdkDir"
+    if ($LASTEXITCODE -ne 0) { throw "CMake configure failed ($LASTEXITCODE)" }
 }
 
 cmake --build --preset $Preset -- -j $Jobs
