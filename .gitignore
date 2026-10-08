@@ -1,0 +1,20 @@
+# Your own extracted game files and the ReXGlue SDK (see README.md)
+/game/
+/third_party/
+
+# Recompiled C++ produced by `rexglue codegen` from the game executable. It is a translation of
+# EA's code: never commit it. rexglue.cmake is SDK boilerplate the build needs.
+/generated/*
+!/generated/rexglue.cmake
+
+# Build output, logs, crash reports
+/out/
+/logs/
+*.log
+codegen.console.txt
+crash_trace.txt
+
+# Game executables, packages and decrypted images
+*.xex
+*.XEX
+*.pe
